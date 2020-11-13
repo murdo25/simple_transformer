@@ -29,10 +29,10 @@ class Data:
 
 
 # d = Data('mini_train_set.txt') 
-d = Data('full_train_set.txt') 
+# d = Data('full_train_set.txt') 
 
-print("VOCAB:", d.vocab)
-print("NUM TOKENS", len(d.vocab))
-print("SIZE DATASET:", len(d.data))
+# print("VOCAB:", d.vocab)
+# print("NUM TOKENS", len(d.vocab))
+# print("SIZE DATASET:", len(d.data))
 
-print("sample:",d.data[0])
+# print("sample:",d.data[0])

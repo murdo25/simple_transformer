@@ -1,0 +1,20 @@
+Stepping off points:
+NMT
+Chatbots
+
+
+
+
+full example with encoder 
+https://colab.research.google.com/github/pytorch/tutorials/blob/gh-pages/_downloads/dca13261bbb4e9809d1a3aa521d22dd7/transformer_tutorial.ipynb#scrollTo=6GpQCCqn0JeA
+
+
+full walkthrough
+https://towardsdatascience.com/how-to-code-the-transformer-in-pytorch-24db27c8f9ec
+
+
+chatbot
+https://github.com/fawazsammani/chatbot-transformer
+
+
+
