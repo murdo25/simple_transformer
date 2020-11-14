@@ -164,17 +164,17 @@ class PositionalEncoding(nn.Module):
 
 # batch_size = 20
 batch_size = 2 
+dataset = 'data/mini_train_set.txt'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-datasetLoader = Data('data/mini_train_set.txt', BATCH_SIZE=batch_size)
-# datasetLoader = Data('data/full_train_set.txt')
-# print(datasetLoader.data)
 
+datasetLoader = Data(dataset, BATCH_SIZE=batch_size)
 
-
-# train_data = batchify(train_txt, batch_size)
-train_data = batchify(datasetLoader.data, batch_size)
+train_data = datasetLoader.train
 exit()
+
+
+
 val_data = batchify(val_txt, eval_batch_size)
 test_data = batchify(test_txt, eval_batch_size)
 
