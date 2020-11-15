@@ -168,9 +168,10 @@ dataset = 'data/mini_train_set.txt'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-datasetLoader = Data(dataset, BATCH_SIZE=batch_size)
+datasetLoader = Data(dataset, device, BATCH_SIZE=batch_size)
 
 train_data = datasetLoader.train
+print(train_data.shape)
 exit()
 
 

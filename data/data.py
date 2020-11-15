@@ -1,10 +1,12 @@
 from tqdm import tqdm
 import torchtext
 from torchtext.data.utils import get_tokenizer
+import revtok # Just to make sure you have revtok installed.. pip install revtok
 
 class Data:
-    def __init__(self, data_path, BATCH_SIZE=32):
+    def __init__(self, data_path, device, BATCH_SIZE=32):
         self.batch_size = BATCH_SIZE
+        self.device = device
         self.vocab = {}
         self.max_seq_len = 0 
         # self.train = []
@@ -14,7 +16,6 @@ class Data:
                 init_token='<sos>',
                 eos_token='<eos>',
                 lower=True)
-        # self.TEXT_REV = torchtext.data.ReversibleField( lower=True, include_lengths=True)
 
         self.data = self.clean(data_path)
         self.max_seq_len = self.find_max_seq_len(self.data)
@@ -44,22 +45,7 @@ class Data:
         print("max_seq_len: ", max_seq_len)
         return max_seq_len
 
-    def toString(self, T):
-        print(T)
-        charArray = [c for c in T]
-        print(charArray)
-
-        for indx in charArray:
-            for key in self.TEXT.vocab.stoi.keys():
-                # print(indx, key)
-                if key == indx:
-                    print(key)
-
-        # charArray = [self.TEXT.vocab.stoi[int(c)] for c in T]
-        # print(charArray)
-
-
-    def batchify(self, data, batch_size):
+    def batchify(self, data, bsz):
         # print("input to numericalize", data)
         # print("vocab", self.TEXT.vocab.stoi)
         print("\n\n")
@@ -67,37 +53,30 @@ class Data:
         # data = [self.TEXT.numericalize(d) for d in data]
         data = self.TEXT.pad(data)
         data = self.TEXT.numericalize(data)
-        data = data
-        print(data)
-        print(self.TEXT.reverse(data))
-        # print(self.TEXT_REV.reverse(data[0]))
-        print(data.shape)
+        # print(self.TEXT.reverse(data))
+        # print(data.shape)
 
-        # self.toString(data[0])
 
-        # print(data[0])
-        # print(data[0][0].shape)
-        # print(data[0][0][0].shape)
-
-        # data = self.TEXT.pad(data)
-        # print(data[0][0])
-        # print(data)
-        exit()
-
-        data = data.cat(data)
-        print(data.shape)
+        data = data.T
+        print("data.T shape", data.shape)
         # Divide the dataset into bsz parts.
-        nbatch = []
-        # for i in range(0, len(data), bsz):
-        #     nbatch.append(data[i:i + bsz])
-        print(nbatch)
-
-        data = torch.cat(nbatch)
-        print("shape",data.shape)
         # nbatch = data.size(0) // bsz
+        # print("nbatch", nbatch.shape)
+        # Trim off any extra elements that wouldn't cleanly fit (remainders).
+        # data = data.narrow(0, 0, nbatch * bsz)
         # Evenly divide the data across the bsz batches.
-        # data = data.view(bsz, -1).t().contiguous()
-        # return data.to(device)
+        data = data.view(bsz, -1).t().contiguous()
+        return data.to(self.device)
+
+
+
+        # print("shape",data.shape)
+        # data = data.size(0) // batch_size 
+        # Evenly divide the data across the bsz batches.
+        # data = data.view(batch_size, -1).t().contiguous()
+        # 
+        # return data.to(self.device)
+
 
 # d = Data('mini_train_set.txt') 
 # d = Data('full_train_set.txt') 
