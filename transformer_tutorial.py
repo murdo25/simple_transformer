@@ -172,16 +172,14 @@ datasetLoader = Data(dataset, device, BATCH_SIZE=batch_size)
 
 train_data = datasetLoader.train
 print(train_data.shape)
-exit()
 
 
-
-val_data = batchify(val_txt, eval_batch_size)
-test_data = batchify(test_txt, eval_batch_size)
+# val_data = batchify(val_txt, eval_batch_size)
+# test_data = batchify(test_txt, eval_batch_size)
 
 print("train_data", train_data.shape)
-print("val_data", val_data.shape)
-print("test_data", test_data.shape)
+# print("val_data", val_data.shape)
+# print("test_data", test_data.shape)
 
 
 print("train_data 0,0", train_data[0][0])
@@ -224,7 +222,7 @@ def get_batch(source, i):
 # equal to the length of the vocab object.
 #
 
-ntokens = len(TEXT.vocab.stoi) # the size of vocabulary
+ntokens = len(datasetLoader.TEXT.vocab.stoi) # the size of vocabulary
 emsize = 200 # embedding dimension
 nhid = 200 # the dimension of the feedforward network model in nn.TransformerEncoder
 nlayers = 2 # the number of nn.TransformerEncoderLayer in nn.TransformerEncoder
@@ -261,7 +259,7 @@ def train():
     model.train() # Turn on the train mode
     total_loss = 0.
     start_time = time.time()
-    ntokens = len(TEXT.vocab.stoi)
+    ntokens = len(datasetLoader.TEXT.vocab.stoi)
     for batch, i in tqdm(enumerate(range(0, train_data.size(0) - 1, bptt))):
         data, targets = get_batch(train_data, i)
         optimizer.zero_grad()
@@ -288,7 +286,7 @@ def train():
 def evaluate(eval_model, data_source):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
-    ntokens = len(TEXT.vocab.stoi)
+    ntokens = len(datasetLoader.TEXT.vocab.stoi)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, bptt):
             data, targets = get_batch(data_source, i)
