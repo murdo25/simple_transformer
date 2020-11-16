@@ -163,7 +163,7 @@ class PositionalEncoding(nn.Module):
 
 
 # batch_size = 20
-batch_size = 2 
+batch_size = 4 
 dataset = 'data/mini_train_set.txt'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -205,9 +205,17 @@ print("train_data 0,0", train_data[0][0])
 
 bptt = 35
 def get_batch(source, i):
+    print("source:", source.shape)
+    exit()
+    source = source[0].T
+    print("\n\n")
+    print("source:",source.shape,"i:",i)
     seq_len = min(bptt, len(source) - 1 - i)
+    print("seq_len:", seq_len)
     data = source[i:i+seq_len]
-    target = source[i+1:i+1+seq_len].view(-1)
+    print("data:",data.shape)
+    target = source[i+1:i+1+seq_len].reshape(-1)
+    print("data:",data.shape,"target:",target.shape)
     return data, target
 
 

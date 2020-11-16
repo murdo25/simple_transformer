@@ -68,7 +68,7 @@ class Data:
         print("narrow", data.shape)
         # Evenly divide the data across the bsz batches.
         # data = data.view(bsz, -1).t().contiguous()
-        data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
+        # data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
         print(data.shape)
         return data.to(self.device)
 
