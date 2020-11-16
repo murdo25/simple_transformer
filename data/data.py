@@ -46,31 +46,24 @@ class Data:
         return max_seq_len
 
     def batchify(self, data, batch_size):
-        # print("input to numericalize", data)
         # print("vocab", self.TEXT.vocab.stoi)
-        print("\n\n")
         
         # data = [self.TEXT.numericalize(d) for d in data]
         data = self.TEXT.pad(data)
         data = self.TEXT.numericalize(data)
         # print(self.TEXT.reverse(data))
-        # print(data.shape)
-
-
         data = data.T
-        print("data.T shape", data.shape)
         # Divide the dataset into bsz parts.
         nbatch = data.size(0) // batch_size 
         # print("nbatch", nbatch.shape)
         # Trim off any extra elements that wouldn't cleanly fit (remainders).
         data = data.narrow(0, 0, nbatch * batch_size)
-
-        print("narrow", data.shape)
         # Evenly divide the data across the bsz batches.
         # data = data.view(bsz, -1).t().contiguous()
         # data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
-        print(data.shape)
-        return data.to(self.device)
+        print("full dataset:", data.shape)
+        # return data.to(self.device)
+        return data
 
 
 

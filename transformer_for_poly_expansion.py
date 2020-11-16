@@ -156,15 +156,18 @@ class PositionalEncoding(nn.Module):
 #
 
 
-# batch_size = 20
-batch_size = 4 
-dataset = 'data/mini_train_set.txt'
+batch_size = 20
+# dataset = 'data/mini_train_set.txt'
+# dataset = 'data/full_train_set.txt'
+dataset = 'data/half_train_set.txt'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 datasetLoader = Data(dataset, device, BATCH_SIZE=batch_size)
 
 train_data = datasetLoader.train
+val_data = datasetLoader.train
+test_data = datasetLoader.train
 print(train_data.shape)
 
 
@@ -176,7 +179,7 @@ print("train_data", train_data.shape)
 # print("test_data", test_data.shape)
 
 
-print("train_data 0,0", train_data[0][0])
+# print("train_data 0,0", train_data[0][0])
 ######################################################################
 # Functions to generate input and target sequence
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -199,18 +202,18 @@ print("train_data 0,0", train_data[0][0])
 
 bptt = 35
 def get_batch(source, i):
-    print("source:", source.shape)
-    exit()
-    source = source[0].T
     print("\n\n")
+    print("source:", source.shape)
+    source = source.T
     print("source:",source.shape,"i:",i)
     seq_len = min(bptt, len(source) - 1 - i)
     print("seq_len:", seq_len)
     data = source[i:i+seq_len]
-    print("data:",data.shape)
+    # print("data:",data.shape)
     target = source[i+1:i+1+seq_len].reshape(-1)
     print("data:",data.shape,"target:",target.shape)
-    return data, target
+    # return data, target
+    return data.to(device), target.to(device)
 
 
 ######################################################################
@@ -269,6 +272,7 @@ def train():
         if data.size(0) != bptt:
             src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
         output = model(data, src_mask)
+        print("output:",output.shape)
         loss = criterion(output.view(-1, ntokens), targets)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
@@ -292,6 +296,7 @@ def evaluate(eval_model, data_source):
     eval_model.eval() # Turn on the evaluation mode
     total_loss = 0.
     ntokens = len(datasetLoader.TEXT.vocab.stoi)
+    src_mask = model.generate_square_subsequent_mask(bptt).to(device)
     with torch.no_grad():
         for i in range(0, data_source.size(0) - 1, bptt):
             data, targets = get_batch(data_source, i)
