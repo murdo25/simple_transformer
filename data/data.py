@@ -4,11 +4,15 @@ from torchtext.data.utils import get_tokenizer
 import revtok # Just to make sure you have revtok installed.. pip install revtok
 
 class Data:
-    def __init__(self, data_path, device, BATCH_SIZE=32):
+    def __init__(self, data_path, device, BPTT=35, BATCH_SIZE=32):
         self.batch_size = BATCH_SIZE
         self.device = device
         self.vocab = {}
         self.max_seq_len = 0 
+        self.bptt = BPTT
+
+        self.progress_through_dataset = 0
+
         # self.train = []
         self.test = [] # split(split_ratio=0.7, stratified=False, strata_field='label', random_state=None)
         self.eval = []
@@ -60,11 +64,40 @@ class Data:
         data = data.narrow(0, 0, nbatch * batch_size)
         # Evenly divide the data across the bsz batches.
         # data = data.view(bsz, -1).t().contiguous()
-        # data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
+        data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
         print("full dataset:", data.shape)
         # return data.to(self.device)
         return data
 
+        def get_next_n_datapoints(self, data, current_itteration, batch_size):
+            return data[current_itteration:current_itteration+batch_size]
+
+
+
+    def get_batch(self, source, batch, i):
+        print("\n\n")
+        print("incomming source",source.shape)
+        source = source[batch]
+        print("batched source", source.shape)
+        print("\n\n")
+
+        # if(i > self.max_seq_len):
+        #     data = self.get_the_next_n_datapoints()
+        
+        # print("\n\n")
+        # print("source:", source.shape)
+        source = source.T
+        # print("source:",source.shape,"i:",i)
+        seq_len = min(self.bptt, len(source) - 1 - i)
+        # print("seq_len:", seq_len)
+        data = source[i:i+seq_len]
+        # print("data:",data.shape)
+        target = source[i+1:i+1+seq_len].reshape(-1)
+        # print("data:",data.shape,"target:",target.shape)
+        # return data, target
+        # SHOULD RETURN DATA OF SHAPE: [BPTT, batch_size]
+        print("get_batch data:",data.shape, "target:",target.shape)
+        return data.to(self.device), target.to(self.device)
 
 
         # print("shape",data.shape)
@@ -83,18 +116,18 @@ class Data:
 
 # print(type(train_txt.examples[0].text))
 # print(train_txt.examples[0].text)
-# print("my data:", datasetLoader.data[0])
+# print("my data:", dataset.data[0])
 
-# data = TEXT.numericalize(datasetLoader.data[0])
+# data = TEXT.numericalize(dataset.data[0])
 # print(data)
 # print(data.shape)
-# print("my data:", len(datasetLoader.data[0]))
+# print("my data:", len(dataset.data[0]))
 # print(TEXT.vocab_cls)
 
 
 # def batchify(data, bsz):
 #     #data = TEXT.numericalize([data.examples[0].text])
-#     data = datasetLoader.data
+#     data = dataset.data
 #     print("data", type(data), data)
 #     # Divide the dataset into bsz parts.
 #     nbatch = []
