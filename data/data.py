@@ -46,7 +46,7 @@ class Data:
         for d in self.data:
             if len(d) > max_seq_len:
                 max_seq_len = len(d)
-        print("max_seq_len: ", max_seq_len)
+        # print("max_seq_len: ", max_seq_len)
         return max_seq_len
 
     def batchify(self, data, batch_size):
@@ -65,7 +65,7 @@ class Data:
         # Evenly divide the data across the bsz batches.
         # data = data.view(bsz, -1).t().contiguous()
         data = data.reshape((data.shape[0]//batch_size, batch_size, data.shape[1]))
-        print("full dataset:", data.shape)
+        # print("full dataset:", data.shape)
         # return data.to(self.device)
         return data
 
@@ -75,11 +75,11 @@ class Data:
 
 
     def get_batch(self, source, batch, i):
-        print("\n\n")
-        print("incomming source",source.shape)
+        # print("\n\n")
+        # print("incomming source",source.shape)
         source = source[batch]
-        print("batched source", source.shape)
-        print("\n\n")
+        # print("batched source", source.shape)
+        # print("\n\n")
 
         # if(i > self.max_seq_len):
         #     data = self.get_the_next_n_datapoints()

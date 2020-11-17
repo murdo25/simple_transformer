@@ -268,21 +268,31 @@ def train():
     total_loss = 0.
     start_time = time.time()
     ntokens = len(dataset.TEXT.vocab.stoi)
-    src_mask = model.generate_square_subsequent_mask(bptt).to(device)
+    default_src_mask = model.generate_square_subsequent_mask(bptt).to(device)
+
+    # print("initial mask:", src_mask.shape)
+
     # for batch, i in enumerate(range(0, train_data.size(0) - 1, bptt)):
     for batch in range(train_data.size(0)):
         for i in range(dataset.max_seq_len):
-            print("batch:",batch, "i", i)
+            # print("batch:",batch, "i", i)
             data, targets = dataset.get_batch(train_data, batch, i)
             optimizer.zero_grad()
             if data.size(0) != bptt:
-                src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
+                new_src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
+                # print("generate new mask:", new_src_mask.shape,"data", data.size(0),"bptt",bptt)
+                output = model(data, new_src_mask)
+            else:
+                # print("use default mask", default_src_mask.shape)
+                output = model(data, default_src_mask)
             # print(data,src_mask)
-            print("data.shape:",data.shape,"mask.shape:", src_mask.shape)
-            output = model(data, src_mask)
+            # print("data.shape:",data.shape,"mask.shape:", src_mask.shape)
+            # print("data",data,"mask.shape:", src_mask)
+            # output = model(data, src_mask)
             # print("output:",output.shape)
             loss = criterion(output.view(-1, ntokens), targets)
-            print("loss:", loss)
+            print("-"*99,"loss:",loss.item())
+            # print("loss:", loss)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
             optimizer.step()
