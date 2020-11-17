@@ -96,7 +96,7 @@ class Data:
         # print("data:",data.shape,"target:",target.shape)
         # return data, target
         # SHOULD RETURN DATA OF SHAPE: [BPTT, batch_size]
-        print("get_batch data:",data.shape, "target:",target.shape)
+        # print("get_batch data:",data.shape, "target:",target.shape)
         return data.to(self.device), target.to(self.device)
 
 

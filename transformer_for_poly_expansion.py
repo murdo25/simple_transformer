@@ -157,10 +157,12 @@ class PositionalEncoding(nn.Module):
 
 
 batch_size = 20
-bptt = 35
+# bptt = 35
+bptt = 59 
 # dataset = 'data/mini_train_set.txt'
 # dataset = 'data/full_train_set.txt'
-dataFile = 'data/half_train_set.txt'
+# dataFile = 'data/half_train_set.txt'
+dataFile = 'data/1k_train_set.txt'
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -291,7 +293,7 @@ def train():
             # output = model(data, src_mask)
             # print("output:",output.shape)
             loss = criterion(output.view(-1, ntokens), targets)
-            print("-"*99,"loss:",loss.item())
+            # print("-"*99,"loss:",loss.item())
             # print("loss:", loss)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 0.5)
@@ -299,17 +301,17 @@ def train():
 
             total_loss += loss.item()
             log_interval = 200
-            if batch % log_interval == 0 and batch > 0:
-                cur_loss = total_loss / log_interval
-                elapsed = time.time() - start_time
-                print('| epoch {:3d} | {:5d}/{:5d} batches | '
-                      'lr {:02.2f} | ms/batch {:5.2f} | '
-                      'loss {:5.2f} | ppl {:8.2f}'.format(
-                        epoch, batch, len(train_data) // bptt, scheduler.get_lr()[0],
-                        elapsed * 1000 / log_interval,
-                        cur_loss, math.exp(cur_loss)))
-                total_loss = 0
-                start_time = time.time()
+        # if batch % log_interval == 0 and batch > 0:
+        cur_loss = total_loss / log_interval
+        elapsed = time.time() - start_time
+        print('| epoch {:3d} | {:5d}/{:5d} batches | '
+              'lr {:02.2f} | ms/batch {:5.2f} | '
+              'loss {:5.2f} | ppl {:8.2f}'.format(
+                epoch, batch, len(train_data) // bptt, scheduler.get_lr()[0],
+                elapsed * 1000 / log_interval,
+                cur_loss, math.exp(cur_loss)))
+        total_loss = 0
+        start_time = time.time()
 
 def evaluate(eval_model, data_source):
     eval_model.eval() # Turn on the evaluation mode
@@ -317,13 +319,25 @@ def evaluate(eval_model, data_source):
     ntokens = len(dataset.TEXT.vocab.stoi)
     src_mask = model.generate_square_subsequent_mask(bptt).to(device)
     with torch.no_grad():
-        for i in range(0, data_source.size(0) - 1, bptt):
-            data, targets = get_batch(data_source, i)
-            if data.size(0) != bptt:
-                src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
-            output = eval_model(data, src_mask)
-            output_flat = output.view(-1, ntokens)
-            total_loss += len(data) * criterion(output_flat, targets).item()
+        for batch in range(data_source.size(0)):
+            for i in range(dataset.max_seq_len):
+            # for i in range(0, data_source.size(0) - 1, bptt):
+                data, targets = dataset.get_batch(data_source, batch, i)
+
+                if data.size(0) != bptt:
+                    new_src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
+                    # print("generate new mask:", new_src_mask.shape,"data", data.size(0),"bptt",bptt)
+                    output = model(data, new_src_mask)
+                else:
+                    # print("use default mask", default_src_mask.shape)
+                    output = model(data, default_src_mask)
+
+                # data, targets = get_batch(data_source, i)
+                # if data.size(0) != bptt:
+                #     src_mask = model.generate_square_subsequent_mask(data.size(0)).to(device)
+                # output = eval_model(data, src_mask)
+                output_flat = output.view(-1, ntokens)
+                total_loss += len(data) * criterion(output_flat, targets).item()
     return total_loss / (len(data_source) - 1)
 
 ######################################################################
@@ -338,10 +352,12 @@ for epoch in range(1, epochs + 1):
     epoch_start_time = time.time()
     train()
     val_loss = evaluate(model, val_data)
+    print("val_loss",val_loss)
     print('-' * 89)
     print('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
           'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                     val_loss, math.exp(val_loss)))
+                                     val_loss, val_loss))
+                                    #  val_loss, math.exp(val_loss)))
     print('-' * 89)
 
     if val_loss < best_val_loss:
@@ -359,6 +375,8 @@ for epoch in range(1, epochs + 1):
 
 test_loss = evaluate(best_model, test_data)
 print('=' * 89)
-print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
-    test_loss, math.exp(test_loss)))
+print('| End of training | test loss {:5.2f} |'.format(
+    test_loss))
+# print('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
+#     test_loss, math.exp(test_loss)))
 print('=' * 89)
